@@ -1,5 +1,10 @@
 
-Go to ./api and run:
+Go to ./api and install all requirements:
+```
+pip install -r ./requirements.txt
+```
+
+and then start api:
 ```
 uvicorn main:app --reload
 ```
