@@ -1,28 +1,183 @@
+<!-- Full index.html content goes here -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PM2.5 Chatbot</title>
+    <title>Prediksi PM2.5</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-lg bg-white shadow-xl rounded-xl flex flex-col h-[90vh]">
-        <!-- Header -->
-        <div class="p-4 bg-blue-600 text-white rounded-t-xl font-semibold text-lg">
-            PM2.5 Chatbot
+
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden">
+
+        <!-- HEADER -->
+        <div class="header p-8 text-center bg-gradient-to-r from-slate-800 to-sky-700">
+            <h1 class="text-3xl font-bold text-white drop-shadow">  Prediksi Kualitas Udara PM2.5</h1>
+            <p class="text-slate-200 mt-2">Sistem prediksi berbasis Machine Learning</p>
         </div>
 
-        <!-- Chat Box -->
-        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
+        <!-- MAIN BODY -->
+        <div class="grid grid-cols-1 md:grid-cols-2">
 
-        <!-- Input Area -->
-        <div class="p-4 flex gap-2 border-t">
-            <input id="user-input" type="text" placeholder="Tanyakan sesuatu..." class="flex-1 px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" />
-            <button id="send-btn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Kirim</button>
+            <!-- ========================= -->
+            <!-- FORM SECTION              -->
+            <!-- ========================= -->
+            <div class="p-8 border-r">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Form Input Parameter</h2>
+
+                <form id="pm-form" class="space-y-4">
+
+                    <!-- PM10 -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Konsentrasi PM10</label>
+                            <input type="number" step="any" id="pm10" class="w-full p-2 border rounded-lg" placeholder="Masukkan nilai PM10" required
+                            data-desc="<ul>
+                                <li><strong>PM10:</strong> Partikel debu halus ≤10µm</li>
+                                <li>0–20 Sangat Baik – Udara bersih</li>
+                                <li>21–35 Baik – Sedikit polusi</li>
+                                <li>36–50 Sedang – Kelompok sensitif waspada</li>
+                                <li>51–100 Tidak Sehat bagi sensitif</li>
+                                <li>101–150 Tidak Sehat – semua mungkin terdampak</li>
+                                <li>151+ Sangat Tidak Sehat</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-pm10"></span>
+                        </div>
+
+                        <!-- SO2 -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Konsentrasi SO₂</label>
+                            <input type="number" step="any" id="so2" class="w-full p-2 border rounded-lg" placeholder="Masukkan nilai SO₂" required
+                            data-desc="<ul>
+                                <li><strong>SO₂:</strong> Gas dari pembakaran fosil, iritasi pernapasan</li>
+                                <li>0–20 Baik – Aman</li>
+                                <li>21–40 Sedang – Iritasi ringan</li>
+                                <li>41–60 Tidak Sehat – Gangguan pernapasan</li>
+                                <li>61+ Sangat Tidak Sehat</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-so2"></span>
+                        </div>
+
+                        <!-- CO -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Konsentrasi CO</label>
+                            <input type="number" step="any" id="co" class="w-full p-2 border rounded-lg" placeholder="Masukkan nilai CO" required
+                            data-desc="<ul>
+                                <li><strong>CO:</strong> Gas beracun dari pembakaran tidak sempurna</li>
+                                <li>0–5 Baik – Aman</li>
+                                <li>6–10 Sedang – Risiko ringan</li>
+                                <li>11–15 Tidak Sehat – Pusing, sakit kepala</li>
+                                <li>16+ Sangat Tidak Sehat</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-co"></span>
+                        </div>
+
+                        <!-- O3 -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Konsentrasi O₃</label>
+                            <input type="number" step="any" id="o3" class="w-full p-2 border rounded-lg" placeholder="Masukkan nilai O₃" required
+                            data-desc="<ul>
+                                <li><strong>O₃:</strong> Ozon permukaan, iritasi pernapasan</li>
+                                <li>0–25 Baik</li>
+                                <li>26–40 Sedang</li>
+                                <li>41–50 Tidak Sehat bagi sensitif</li>
+                                <li>51–70 Tidak Sehat</li>
+                                <li>71+ Sangat Tidak Sehat</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-o3"></span>
+                        </div>
+
+                        <!-- NO2 -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Konsentrasi NO₂</label>
+                            <input type="number" step="any" id="no2" class="w-full p-2 border rounded-lg" placeholder="Masukkan nilai NO₂" required
+                            data-desc="<ul>
+                                <li><strong>NO₂:</strong> Gas dari kendaraan & industri</li>
+                                <li>0–20 Baik</li>
+                                <li>21–40 Sedang</li>
+                                <li>41–60 Tidak Sehat</li>
+                                <li>61+ Sangat Tidak Sehat</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-no2"></span>
+                        </div>
+
+                        <!-- max_val -->
+                        <div class="flex flex-col gap-1">
+                            <label class="block text-sm font-medium">Nilai Maksimum (max_val)</label>
+                            <input type="number" step="1" id="max_val" class="w-full p-2 border rounded-lg" placeholder="Masukkan max_val" required
+                            data-desc="<ul>
+                                <li><strong>max_val:</strong> Batas maksimum skala prediksi</li>
+                                <li>50–150 Rentang nilai model</li>
+                            </ul>" />
+                            <span class="desc-text" id="desc-max_val"></span>
+                        </div>
+
+                    <!-- DATE -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="form-group">
+                            <label class="label">Tahun</label>
+                            <input type="number" id="year" placeholder="2025" required class="input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">Bulan</label>
+                            <input type="number" id="month" min="1" max="12" placeholder="1 - 12" required class="input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">Hari</label>
+                            <input type="number" id="day" min="1" max="31" placeholder="1 - 31" required class="input" />
+                        </div>
+                    </div>
+
+                    <!-- STATION -->
+                    <div class="form-group">
+                        <label class="label">Stasiun Pemantauan</label>
+                        <select id="stasiun_code" class="input">
+                            <option value="1">Jagakarsa</option>
+                            <option value="2">Depok</option>
+                            <option value="3">Kebon Jeruk</option>
+                            <option value="4">Bekasi</option>
+                            <option value="5">Fatmawati</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Prediksi</button>
+                </form>
+            </div>
+
+            <!-- ========================= -->
+            <!-- OUTPUT (CHATBOT / RESULT) -->
+            <!-- ========================= -->
+            <div class="p-8 bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Hasil Prediksi</h2>
+
+                <div id="chat-box" class="output-box"></div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="p-4 text-center text-gray-500 text-sm bg-gray-100">
+            © 2025 Sistem Prediksi Kualitas Udara PM2.5
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
+<!-- Combined improved design index.html placeholder -->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM2.5 Predictor</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- TODO: Full merged content will be added in next update -->
+</body>
+</html>
+
+
