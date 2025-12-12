@@ -1,7 +1,7 @@
 // ===============================
 // KONFIGURASI API
 // ===============================
-const GEMINI_API_KEY = "AIzaSyBusQftxWYhAnkOrGE5JuyuJj1ZwRISr28";
+const GEMINI_API_KEY = "AIzaSyDZacSWNlHFDlO8kjOYO5Wt5TQuYJnNBtU";
 const BACKEND_URL = "http://localhost:8000/predict";
 
 const chatBox = document.getElementById("chat-box");
@@ -52,9 +52,15 @@ async function callGemini(prompt) {
         );
 
         const data = await response.json();
+        // Cek jika ada error dari API
+        if (data.error) {
+            console.error("Gemini API Error:", data.error);
+            return "Error API: " + (data.error.message || "Periksa kunci API Anda.");
+        }
         return data.candidates[0].content.parts[0].text;
     } catch (err) {
-        return "⚠️ Terjadi kesalahan saat menghubungi AI.";
+        console.error("Error fetching Gemini:", err);
+        return "Terjadi kesalahan saat menghubungi AI.";
     }
 }
 
@@ -63,6 +69,15 @@ async function callGemini(prompt) {
 // ===============================
 pmForm.addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    // 💡 PERBAIKAN: Ambil nilai stasiun yang dicentang
+    const selectedStasiun = document.querySelector('input[name="stasiun"]:checked');
+
+    if (!selectedStasiun) {
+        // Jaga-jaga jika tidak ada stasiun yang terpilih (walaupun radio harusnya selalu terpilih)
+        appendMessage("bot", "Mohon pilih Stasiun Pemantauan.");
+        return;
+    }
 
     // Ambil data
     const rawInput = {
@@ -75,7 +90,7 @@ pmForm.addEventListener("submit", async function (e) {
         year: document.getElementById("year").value,
         month: document.getElementById("month").value,
         day: document.getElementById("day").value,
-        stasiun_code: document.getElementById("stasiun_code").value
+        stasiun_code: selectedStasiun.value
     };
 
     // Prompt ekstraksi JSON
@@ -104,6 +119,7 @@ pmForm.addEventListener("submit", async function (e) {
 
     // JSON extraction via Gemini
     let extractedText = await callGemini(extractionPrompt);
+    // Hapus markdown code block jika ada
     extractedText = extractedText.replace(/```json|```/g, "").trim();
 
     let extracted;
@@ -111,20 +127,28 @@ pmForm.addEventListener("submit", async function (e) {
     try {
         extracted = JSON.parse(extractedText);
     } catch (err) {
-        appendMessage("bot", "AI gagal mengekstraksi data JSON.");
+        appendMessage("bot", "AI gagal mengekstraksi data JSON: " + extractedText);
+        console.error("JSON Parse Error:", err, "Raw Text:", extractedText);
         return;
     }
 
     // Kirim ke backend
     let response;
     try {
+        const loadingMessage = appendMessage("bot", "<em>Mengirim data ke model prediksi...</em>");
+        
         response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(extracted)
         });
+        
+        // Hapus pesan loading
+        if (loadingMessage) loadingMessage.remove(); 
+        
     } catch (err) {
-        appendMessage("bot", "❌ Tidak dapat terhubung ke backend.");
+        appendMessage("bot", "Tidak dapat terhubung ke backend. Pastikan server lokal berjalan.");
+        console.error("Backend fetch error:", err);
         return;
     }
 
@@ -134,9 +158,10 @@ pmForm.addEventListener("submit", async function (e) {
     // Prompt penjelasan
     const explanationPrompt = `
     Prediksi PM2.5 adalah ${pm25}.
-    Berikan arti besarnya, risiko kesehatan, dan rekomendasi.
+    Berikan arti besarnya, risiko kesehatan, dan rekomendasi berdasarkan nilai tersebut.
+    Gunakan konteks Indonesia.
     Maksimal 3 kalimat.
-    Gaya chatbot ramah.
+    Gaya chatbot ramah dan informatif.
     `;
 
     const finalAnswer = await callGemini(explanationPrompt);
@@ -147,6 +172,8 @@ pmForm.addEventListener("submit", async function (e) {
 // TOOLTIP INPUT
 // ===============================
 document.querySelectorAll("#pm-form input").forEach(input => {
+    if (!input.dataset.desc) return; 
+
     const desc = document.getElementById("desc-" + input.id);
 
     input.addEventListener("focus", () => {
